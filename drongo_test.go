@@ -88,11 +88,26 @@ func TestAddFloat32(t *testing.T) {
 		want, got = make([]float32, n), make([]float32, n)
 	)
 	simpleAddFloat32(a, b, want)
-	leastSimpleAddFloat32(a, b, got)
-	// AddFloat32(a, b, got)
 
-	if !reflect.DeepEqual(want, got) {
-		t.Fatal("mismatch")
+	for _, c := range []struct {
+		name string
+		f    func(a, b, c []float32)
+	}{{
+		name: "less_simple",
+		f:    lessSimpleAddFloat32,
+	}, {
+		name: "least_simple",
+		f:    leastSimpleAddFloat32,
+	}, {
+		name: "simd",
+		f:    AddFloat32,
+	}} {
+		t.Run(c.name, func(t *testing.T) {
+			c.f(a, b, got)
+			if !reflect.DeepEqual(want, got) {
+				t.Fatal("mismatch")
+			}
+		})
 	}
 }
 
@@ -114,6 +129,9 @@ func BenchmarkAddFloat32(b *testing.B) {
 		}, {
 			name: "least_simple",
 			f:    leastSimpleAddFloat32,
+		}, {
+			name: "simd",
+			f: AddFloat32,
 		}} {
 			b.Run(fmt.Sprintf("%05d/%s", size, c.name), func(b *testing.B) {
 				for b.Loop() {
