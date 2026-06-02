@@ -2,10 +2,13 @@ package drongo
 
 import (
 	"fmt"
+	"math"
 	"math/rand/v2"
 	"reflect"
 	"testing"
 )
+
+var benchmarkSizes = []int{16, 65, 259, 1013, 10001, 100000}
 
 func simpleAddFloat32(a, b, c []float32) {
 	// TODO: pre-check so the compiler has a shot at eliding bounds checks.
@@ -27,6 +30,14 @@ func randFloat32(n int) []float32 {
 	f := make([]float32, n)
 	for i := range f {
 		f[i] = rand.Float32()
+	}
+	return f
+}
+
+func randFloat64(n int) []float64 {
+	f := make([]float64, n)
+	for i := range f {
+		f[i] = rand.Float64()
 	}
 	return f
 }
@@ -65,7 +76,7 @@ func TestAddFloat32(t *testing.T) {
 }
 
 func BenchmarkAddFloat32(b *testing.B) {
-	for _, size := range []int{16, 65, 259, 1013, 10001, 100000} {
+	for _, size := range benchmarkSizes {
 		var (
 			x, y = randFloat32(size), randFloat32(size)
 			z    = make([]float32, size)
@@ -89,6 +100,37 @@ func BenchmarkAddFloat32(b *testing.B) {
 			b.Run(fmt.Sprintf("%05d/%s", size, c.name), func(b *testing.B) {
 				for b.Loop() {
 					c.f(x, y, z)
+				}
+			})
+		}
+	}
+}
+
+var absoluteFloat64s = []struct {
+	name string
+	f    func(a, b []float64)
+}{{
+	name: "simple",
+	f: func(a, b []float64) {
+		for i := range a {
+			b[i] = math.Abs(a[i])
+		}
+	},
+}, {
+	name: "AbsoluteFloat64",
+	f:    AbsoluteFloat64,
+}}
+
+func BenchmarkAbsoluteFloat64(b *testing.B) {
+	for _, size := range benchmarkSizes {
+		var (
+			x = randFloat64(size)
+			y = make([]float64, size)
+		)
+		for _, c := range absoluteFloat64s {
+			b.Run(fmt.Sprintf("%d/%s", size, c.name), func(b *testing.B) {
+				for b.Loop() {
+					c.f(x, y)
 				}
 			})
 		}

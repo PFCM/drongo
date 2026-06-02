@@ -21,3 +21,5 @@ func AddFloat32(a, b, c []float32) {
 		cx.StoreSlicePart(c[i:])
 	}
 }
+
+func AbsoluteFloat64(a, b []float64) {}
