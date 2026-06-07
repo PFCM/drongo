@@ -24,8 +24,14 @@ loop16:
 	WORD $0x4e25d421 // fadd v1.4s, v1.4s, v5.4s
 	WORD $0x4e26d442 // fadd v2.4s, v2.4s, v6.4s
 	WORD $0x4e27d463 // fadd v3.4s, v3.4s, v7.4s
+	// Something like this would be better, but the assembler generates
+	// some kind of integer adds instead of what we're after.
+	// VADD V0.S4, V4.S4, V0.S4
+	// VADD V1.S4, V5.S4, V1.S4
+	// VADD V2.S4, V6.S4, V2.S4
+	// VADD V3.S4, V7.S4, V3.S4
 
-	// Store results back into c (R3)
+	// store results back into c (R3)
 	VST1 [V0.S4, V1.S4, V2.S4, V3.S4], (R3)
 
 	// Move along: bump the addresses and decrement the remaining.
