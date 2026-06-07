@@ -6,6 +6,8 @@ import (
 	"math/rand/v2"
 	"reflect"
 	"testing"
+
+	"github.com/pfcm/drongo/gen"
 )
 
 var benchmarkSizes = []int{16, 65, 259, 1013, 10001, 100000}
@@ -149,6 +151,9 @@ func BenchmarkAddFloat32(b *testing.B) {
 		}, {
 			name: "v2",
 			f:    unrolled32ScalarAddFloat32v2,
+		}, {
+			name: "gen",
+			f:    gen.UnrolledScalarAddFloat32,
 		}} {
 			b.Run(fmt.Sprintf("%05d/%s", size, c.name), func(b *testing.B) {
 				for b.Loop() {
