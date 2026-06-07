@@ -126,11 +126,11 @@ import "fmt"
 
 {{ range .Ops -}}
 {{ $op := . }}
-func unrolled{{.Name}}(a, b, c []{{.Type}}) {
+func Unrolled{{.Name}}(a, b, c []{{.Type}}) {
 	if len(a) != len(b) || len(a) != len(c) {
 		panic(fmt.Errorf("incompatible lengths: %d, %d, %d", len(a), len(b), len(c)))
 	}
-	for len(a) > {{$.Unrolls}} {
+	for len(a) >= {{$.Unrolls}} {
 		{{ range $i := $.Unrolls -}}
 		c[{{$i}}] = {{print $i | call $op.Expr}}
 		{{ end }}

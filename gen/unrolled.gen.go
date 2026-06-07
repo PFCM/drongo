@@ -4,11 +4,11 @@ package gen
 
 import "fmt"
 
-func unrolledScalarAddFloat32(a, b, c []float32) {
+func UnrolledScalarAddFloat32(a, b, c []float32) {
 	if len(a) != len(b) || len(a) != len(c) {
 		panic(fmt.Errorf("incompatible lengths: %d, %d, %d", len(a), len(b), len(c)))
 	}
-	for len(a) > 16 {
+	for len(a) >= 16 {
 		c[0] = a[0] + b[0]
 		c[1] = a[1] + b[1]
 		c[2] = a[2] + b[2]
@@ -35,11 +35,11 @@ func unrolledScalarAddFloat32(a, b, c []float32) {
 	}
 }
 
-func unrolledDivFloat32(a, b, c []float32) {
+func UnrolledDivFloat32(a, b, c []float32) {
 	if len(a) != len(b) || len(a) != len(c) {
 		panic(fmt.Errorf("incompatible lengths: %d, %d, %d", len(a), len(b), len(c)))
 	}
-	for len(a) > 16 {
+	for len(a) >= 16 {
 		c[0] = a[0] / b[0]
 		c[1] = a[1] / b[1]
 		c[2] = a[2] / b[2]
@@ -66,11 +66,11 @@ func unrolledDivFloat32(a, b, c []float32) {
 	}
 }
 
-func unrolledMaxFloat32(a, b, c []float32) {
+func UnrolledMaxFloat32(a, b, c []float32) {
 	if len(a) != len(b) || len(a) != len(c) {
 		panic(fmt.Errorf("incompatible lengths: %d, %d, %d", len(a), len(b), len(c)))
 	}
-	for len(a) > 16 {
+	for len(a) >= 16 {
 		c[0] = max(a[0], b[0])
 		c[1] = max(a[1], b[1])
 		c[2] = max(a[2], b[2])
@@ -97,11 +97,11 @@ func unrolledMaxFloat32(a, b, c []float32) {
 	}
 }
 
-func unrolledMinFloat32(a, b, c []float32) {
+func UnrolledMinFloat32(a, b, c []float32) {
 	if len(a) != len(b) || len(a) != len(c) {
 		panic(fmt.Errorf("incompatible lengths: %d, %d, %d", len(a), len(b), len(c)))
 	}
-	for len(a) > 16 {
+	for len(a) >= 16 {
 		c[0] = min(a[0], b[0])
 		c[1] = min(a[1], b[1])
 		c[2] = min(a[2], b[2])
@@ -128,11 +128,11 @@ func unrolledMinFloat32(a, b, c []float32) {
 	}
 }
 
-func unrolledScalarMulFloat32(a, b, c []float32) {
+func UnrolledScalarMulFloat32(a, b, c []float32) {
 	if len(a) != len(b) || len(a) != len(c) {
 		panic(fmt.Errorf("incompatible lengths: %d, %d, %d", len(a), len(b), len(c)))
 	}
-	for len(a) > 16 {
+	for len(a) >= 16 {
 		c[0] = a[0] * b[0]
 		c[1] = a[1] * b[1]
 		c[2] = a[2] * b[2]
@@ -159,11 +159,11 @@ func unrolledScalarMulFloat32(a, b, c []float32) {
 	}
 }
 
-func unrolledScalarSubFloat32(a, b, c []float32) {
+func UnrolledScalarSubFloat32(a, b, c []float32) {
 	if len(a) != len(b) || len(a) != len(c) {
 		panic(fmt.Errorf("incompatible lengths: %d, %d, %d", len(a), len(b), len(c)))
 	}
-	for len(a) > 16 {
+	for len(a) >= 16 {
 		c[0] = a[0] - b[0]
 		c[1] = a[1] - b[1]
 		c[2] = a[2] - b[2]
