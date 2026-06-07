@@ -14,6 +14,7 @@ import (
 var (
 	unrollsFlag     = flag.Int("unrolls", 16, "`number` of loop iterations to unroll")
 	packageNameFlag = flag.String("package-name", "gen", "go package `name` for the generated code")
+	outputFlag      = flag.String("output", "", "`path` to write output to, writes to stdout if empty")
 )
 
 var scalarBinaryOps = []binaryOp{
@@ -76,6 +77,15 @@ var scalarBinaryOps = []binaryOp{
 func main() {
 	flag.Parse()
 
+	out := os.Stdout
+	if *outputFlag != "" {
+		f, err := os.Create(*outputFlag)
+		if err != nil {
+			log.Fatal(err)
+		}
+		out = f
+	}
+
 	var b bytes.Buffer
 	if err := binaryTmpl.Execute(&b, struct {
 		PackageName string
@@ -93,7 +103,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if _, err := os.Stdout.Write(formatted); err != nil {
+	if _, err := out.Write(formatted); err != nil {
 		log.Fatal(err)
 	}
 }
