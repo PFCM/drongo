@@ -2,16 +2,10 @@
 
 package drongo
 
-import "fmt"
+import (
+	"github.com/pfcm/drongo/arch/arm64"
+)
 
-func AddFloat32(a, b, c []float32) {
-	if len(a) != len(b) || len(a) != len(c) {
-		panic(fmt.Errorf("incompatible lengths: %d, %d, %d", len(a), len(b), len(c)))
-	}
-	addFloat32NEON(a, b, c)
-}
+var AddFloat32 = arm64.AddFloat32
 
-// drongo_arm64.s
-func addFloat32NEON(a, b, c []float32)
-
-var AbsoluteFloat64 = unrolled32ScalarAbsoluteFloat64
+var AbsoluteFloat64 = arm64.AbsoluteFloat64

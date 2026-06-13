@@ -2,24 +2,11 @@
 
 package drongo
 
-import "simd/archsimd"
+import (
+	"github.com/pfcm/drongo/arch/amd64"
+	"github.com/pfcm/drongo/arch/any"
+)
 
-// AddFloat32 adds a to b elementwise, storing the result in c. Only really
-// makes sense to use if you have at least 16 floats to add.
-// TODO: can this be in-place?
-func AddFloat32(a, b, c []float32) {
-	if len(a) != len(b) || len(a) != len(c) {
-		panic("ohno")
-	}
-	// TODO: figure out what's actually available to us.
-	var ax, bx, cx archsimd.Float32x8
-	for i := 0; i < len(a); i += 16 {
-		// TODO: benchmark SlicePart vs just Slice
-		ax = archsimd.LoadFloat32x8SlicePart(a[i:min(i+16, len(a))])
-		bx = archsimd.LoadFloat32x8SlicePart(b[i:min(i+16, len(b))])
-		cx = ax.Add(bx)
-		cx.StoreSlicePart(c[i:])
-	}
-}
+var AddFloat32 = amd64.AddFloat32
 
-func AbsoluteFloat64(a, b []float64) {}
+var AbsoluteFloat64 = any.AbsoluteFloat64

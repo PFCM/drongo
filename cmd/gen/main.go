@@ -9,18 +9,20 @@ import (
 	"log"
 	"os"
 	"text/template"
+	"unicode"
 )
 
 var (
 	unrollsFlag     = flag.Int("unrolls", 16, "`number` of loop iterations to unroll")
 	packageNameFlag = flag.String("package-name", "gen", "go package `name` for the generated code")
 	outputFlag      = flag.String("output", "", "`path` to write output to, writes to stdout if empty")
+	exportFlag      = flag.Bool("export", false, "whether or not generated functions will be exported")
 )
 
 var scalarBinaryOps = []binaryOp{
 	// elementwise float32
 	{
-		Name:   "ScalarAddFloat32",
+		Name:   "AddFloat32",
 		Type:   "float32",
 		Stride: 1,
 		Expr: func(i string) string {
@@ -58,14 +60,14 @@ var scalarBinaryOps = []binaryOp{
 			return fmt.Sprintf("min(a[%s], b[%s])", i, i)
 		},
 	}, {
-		Name:   "ScalarMulFloat32",
+		Name:   "MulFloat32",
 		Type:   "float32",
 		Stride: 1,
 		Expr: func(i string) string {
 			return fmt.Sprintf("a[%s] * b[%s]", i, i)
 		},
 	}, {
-		Name:   "ScalarSubFloat32",
+		Name:   "SubFloat32",
 		Type:   "float32",
 		Stride: 1,
 		Expr: func(i string) string {
@@ -84,6 +86,15 @@ func main() {
 			log.Fatal(err)
 		}
 		out = f
+	}
+
+	// TODO: this better
+	if !*exportFlag {
+		for _, op := range scalarBinaryOps {
+			name := []rune(op.Name)
+			name[0] = unicode.ToLower(name[0])
+			op.Name = string(name)
+		}
 	}
 
 	var b bytes.Buffer
@@ -126,7 +137,7 @@ import "fmt"
 
 {{ range .Ops -}}
 {{ $op := . }}
-func Unrolled{{.Name}}(a, b, c []{{.Type}}) {
+func {{.Name}}(a, b, c []{{.Type}}) {
 	if len(a) != len(b) || len(a) != len(c) {
 		panic(fmt.Errorf("incompatible lengths: %d, %d, %d", len(a), len(b), len(c)))
 	}

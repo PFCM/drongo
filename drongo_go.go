@@ -2,10 +2,10 @@
 
 package drongo
 
-import "github.com/pfcm/drongo/gen"
+import "github.com/pfcm/drongo/arch/any"
 
 // TODO: kind of ugly, but seems to big to get inlined and the extra function
 // call hurts a bit.
-var AddFloat32 = gen.UnrolledScalarAddFloat32
+var AddFloat32 = any.AddFloat32
 
-var AbsoluteFloat64 = unrolled32ScalarAbsoluteFloat64
+func AbsoluteFloat64(a, b []float64)

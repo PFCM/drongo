@@ -7,19 +7,19 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/pfcm/drongo/gen"
+	"github.com/pfcm/drongo/arch/any"
 )
 
 var benchmarkSizes = []int{16, 65, 259, 1013, 10001, 100000}
 
 func simpleAddFloat32(a, b, c []float32) {
-	// TODO: pre-check so the compiler has a shot at eliding bounds checks.
 	for i := range a {
 		c[i] = a[i] + b[i]
 	}
 }
 
 func lessSimpleAddFloat32(a, b, c []float32) {
+	// Let the compile drop bounds checks.
 	if len(a) != len(b) || len(a) != len(c) {
 		panic("no good")
 	}
@@ -28,11 +28,11 @@ func lessSimpleAddFloat32(a, b, c []float32) {
 	}
 }
 
-func unrolled32ScalarAddFloat32v2(a, b, c []float32) {
+func unrolled32ScalarAddFloat32(a, b, c []float32) {
 	if len(a) != len(b) || len(a) != len(c) {
 		panic(fmt.Errorf("incompatible lengths: %d, %d, %d", len(a), len(b), len(c)))
 	}
-	for len(a) > 32 {
+	for len(a) >= 32 {
 		c[0] = a[0] + b[0]
 		c[1] = a[1] + b[1]
 		c[2] = a[2] + b[2]
@@ -94,6 +94,23 @@ func randFloat64(n int) []float64 {
 	return f
 }
 
+var addFloat32s = []struct {
+	name string
+	f    func(a, b, c []float32)
+}{{
+	name: "less_simple",
+	f:    lessSimpleAddFloat32,
+}, {
+	name: "least_simple",
+	f:    unrolled32ScalarAddFloat32,
+}, {
+	name: "fallback",
+	f:    any.AddFloat32,
+}, {
+	name: "arch-specific",
+	f:    AddFloat32,
+}}
+
 func TestAddFloat32(t *testing.T) {
 	var (
 		n         = 1001
@@ -102,19 +119,7 @@ func TestAddFloat32(t *testing.T) {
 	)
 	simpleAddFloat32(a, b, want)
 
-	for _, c := range []struct {
-		name string
-		f    func(a, b, c []float32)
-	}{{
-		name: "less_simple",
-		f:    lessSimpleAddFloat32,
-	}, {
-		name: "least_simple",
-		f:    unrolled32ScalarAddFloat32,
-	}, {
-		name: "simd",
-		f:    AddFloat32,
-	}} {
+	for _, c := range addFloat32s {
 		t.Run(c.name, func(t *testing.T) {
 			for i := range got {
 				got[i] = 0
@@ -137,28 +142,7 @@ func BenchmarkAddFloat32(b *testing.B) {
 			x, y = randFloat32(size), randFloat32(size)
 			z    = make([]float32, size)
 		)
-		for _, c := range []struct {
-			name string
-			f    func(a, b, c []float32)
-		}{{
-			name: "simple",
-			f:    simpleAddFloat32,
-		}, {
-			name: "less_simple",
-			f:    lessSimpleAddFloat32,
-		}, {
-			name: "least_simple",
-			f:    unrolled32ScalarAddFloat32,
-		}, {
-			name: "simd",
-			f:    AddFloat32,
-		}, {
-			name: "v2",
-			f:    unrolled32ScalarAddFloat32v2,
-		}, {
-			name: "gen",
-			f:    gen.UnrolledScalarAddFloat32,
-		}} {
+		for _, c := range addFloat32s {
 			b.Run(fmt.Sprintf("%05d/%s", size, c.name), func(b *testing.B) {
 				for b.Loop() {
 					c.f(x, y, z)
@@ -168,20 +152,111 @@ func BenchmarkAddFloat32(b *testing.B) {
 	}
 }
 
+func simpleAbsFloat64(a, b []float64) {
+	for i := range a {
+		b[i] = math.Abs(a[i])
+	}
+}
+
+func noboundsAbsFloat64(a, b []float64) {
+	if len(a) != len(b) {
+		panic("nope")
+	}
+	for i := range a {
+		b[i] = math.Abs(a[i])
+	}
+}
+
+func unrolled32AbsFloat64(a, b []float64) {
+	if len(a) != len(b) {
+		panic("no thank you")
+	}
+	for len(a) >= 32 {
+		b[0] = math.Abs(a[0])
+		b[1] = math.Abs(a[1])
+		b[2] = math.Abs(a[2])
+		b[3] = math.Abs(a[3])
+		b[4] = math.Abs(a[4])
+		b[5] = math.Abs(a[5])
+		b[6] = math.Abs(a[6])
+		b[7] = math.Abs(a[7])
+
+		b[8] = math.Abs(a[8])
+		b[9] = math.Abs(a[9])
+		b[10] = math.Abs(a[10])
+		b[11] = math.Abs(a[11])
+		b[12] = math.Abs(a[12])
+		b[13] = math.Abs(a[13])
+		b[14] = math.Abs(a[14])
+		b[15] = math.Abs(a[15])
+
+		b[16] = math.Abs(a[16])
+		b[17] = math.Abs(a[17])
+		b[18] = math.Abs(a[18])
+		b[19] = math.Abs(a[19])
+		b[20] = math.Abs(a[20])
+		b[21] = math.Abs(a[21])
+		b[22] = math.Abs(a[22])
+		b[23] = math.Abs(a[23])
+
+		b[24] = math.Abs(a[24])
+		b[25] = math.Abs(a[25])
+		b[26] = math.Abs(a[26])
+		b[27] = math.Abs(a[27])
+		b[28] = math.Abs(a[28])
+		b[29] = math.Abs(a[29])
+		b[30] = math.Abs(a[30])
+		b[31] = math.Abs(a[31])
+
+		a = a[32:]
+		b = b[32:]
+	}
+	for i := range a {
+		b[i] = math.Abs(a[i])
+	}
+}
+
 var absoluteFloat64s = []struct {
 	name string
 	f    func(a, b []float64)
 }{{
 	name: "simple",
-	f: func(a, b []float64) {
-		for i := range a {
-			b[i] = math.Abs(a[i])
-		}
-	},
+	f:    simpleAbsFloat64,
 }, {
-	name: "AbsoluteFloat64",
+	name: "no-bounds-checks",
+	f:    noboundsAbsFloat64,
+}, {
+	name: "unrolled-32",
+	f:    unrolled32AbsFloat64,
+}, {
+	name: "fallback",
+	f:    any.AbsoluteFloat64,
+}, {
+	name: "arch-specific",
 	f:    AbsoluteFloat64,
 }}
+
+func TestAbsoluteFloat64(t *testing.T) {
+	var (
+		n         = 999
+		in        = randFloat64(n)
+		want, got = make([]float64, n), make([]float64, n)
+	)
+	simpleAbsFloat64(in, want)
+	for _, c := range absoluteFloat64s {
+		t.Run(c.name, func(t *testing.T) {
+			for i := range got {
+				got[i] = 0
+			}
+			c.f(in, got)
+			for i := range want {
+				if want[i] != got[i] {
+					t.Fatalf("mismatch: first difference at %d: %f != %f", i, want[i], got[i])
+				}
+			}
+		})
+	}
+}
 
 func BenchmarkAbsoluteFloat64(b *testing.B) {
 	for _, size := range benchmarkSizes {
