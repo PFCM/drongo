@@ -30,7 +30,7 @@ func clipFloat32(in []float32, lower, upper float32, out []float32) // clip.s
 
 func ClipFloat32(in []float32, lower, upper float32, out []float32) {
 	if len(in) != len(out) {
-		panic(fmt.Errorf("incompatible lengths: %d, %d, %d", len(in), len(out)))
+		panic(fmt.Errorf("incompatible lengths: %d, %d", len(in), len(out)))
 	}
 	clipFloat32(in, lower, upper, out)
 }
