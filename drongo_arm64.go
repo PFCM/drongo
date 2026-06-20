@@ -9,3 +9,5 @@ import (
 var AddFloat32 = arm64.AddFloat32
 
 var AbsoluteFloat64 = arm64.AbsoluteFloat64
+
+var ClipFloat32 = arm64.ClipFloat32

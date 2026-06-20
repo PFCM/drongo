@@ -1,14 +1,14 @@
-// package any has fallbacks that should build for anything. It's also mostly
+// package all has fallbacks that should build for anything. It's also mostly
 // generated code, because unrolling loops is boring. See cmd/gen for the actual
 // generation.
-package any
+package all
 
 import (
 	"fmt"
 	"math"
 )
 
-//go:generate go run ../../cmd/gen -package-name=any -unrolls=16 -export -output=./unrolled.gen.go
+//go:generate go run ../../cmd/gen -package-name=all -unrolls=16 -export -output=./unrolled.gen.go
 
 func AbsoluteFloat64(a, b []float64) {
 	if len(a) != len(b) {
@@ -95,4 +95,38 @@ func AbsoluteFloat64(a, b []float64) {
 	for i := range a {
 		b[i] = math.Abs(a[i])
 	}
+}
+
+func ClipFloat32(in []float32, lower, upper float32, out []float32) {
+	if len(in) != len(out) {
+		panic(fmt.Errorf("incompatible lengths: %d, %d", len(in), len(out)))
+	}
+	for len(in) >= 16 {
+		out[0] = min(max(in[0], lower), upper)
+		out[1] = min(max(in[1], lower), upper)
+		out[2] = min(max(in[2], lower), upper)
+		out[3] = min(max(in[3], lower), upper)
+		out[4] = min(max(in[4], lower), upper)
+		out[5] = min(max(in[5], lower), upper)
+		out[6] = min(max(in[6], lower), upper)
+		out[7] = min(max(in[7], lower), upper)
+
+		out[8] = min(max(in[8], lower), upper)
+		out[9] = min(max(in[9], lower), upper)
+		out[10] = min(max(in[10], lower), upper)
+		out[11] = min(max(in[11], lower), upper)
+		out[12] = min(max(in[12], lower), upper)
+		out[13] = min(max(in[13], lower), upper)
+		out[14] = min(max(in[14], lower), upper)
+		out[15] = min(max(in[15], lower), upper)
+
+		in = in[16:]
+		out = out[16:]
+	}
+	for i := range in {
+		out[i] = min(max(in[i], lower), upper)
+	}
+}
+
+func ClipFloat64(in []float64, upper, lower float64, out []float64) {
 }

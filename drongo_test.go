@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/pfcm/drongo/arch/any"
+	"github.com/pfcm/drongo/arch/all"
 )
 
 var benchmarkSizes = []int{16, 65, 259, 1013, 10001, 100000}
@@ -105,7 +105,7 @@ var addFloat32s = []struct {
 	f:    unrolled32ScalarAddFloat32,
 }, {
 	name: "fallback",
-	f:    any.AddFloat32,
+	f:    all.AddFloat32,
 }, {
 	name: "arch-specific",
 	f:    AddFloat32,
@@ -230,7 +230,7 @@ var absoluteFloat64s = []struct {
 	f:    unrolled32AbsFloat64,
 }, {
 	name: "fallback",
-	f:    any.AbsoluteFloat64,
+	f:    all.AbsoluteFloat64,
 }, {
 	name: "arch-specific",
 	f:    AbsoluteFloat64,
@@ -268,6 +268,93 @@ func BenchmarkAbsoluteFloat64(b *testing.B) {
 			b.Run(fmt.Sprintf("%d/%s", size, c.name), func(b *testing.B) {
 				for b.Loop() {
 					c.f(x, y)
+				}
+			})
+		}
+	}
+}
+
+func simpleClip32(in []float32, lower, upper float32, out []float32) {
+	for i, v := range in {
+		out[i] = min(max(v, lower), upper)
+	}
+}
+
+func branchClip32(in []float32, lower, upper float32, out []float32) {
+	for i, v := range in {
+		switch {
+		case v < lower:
+			out[i] = lower
+		case v > upper:
+			out[i] = upper
+		default:
+			out[i] = v
+		}
+	}
+}
+
+var clip32s = []struct {
+	name string
+	f    func([]float32, float32, float32, []float32)
+}{{
+	name: "simple",
+	f:    simpleClip32,
+}, {
+	name: "branch",
+	f:    branchClip32,
+}, {
+	name: "fallback",
+	f:    all.ClipFloat32,
+}, {
+	name: "arch-specific",
+	f:    ClipFloat32,
+}}
+
+func TestClipFloat32(t *testing.T) {
+	var (
+		n    = 1013
+		in   = randFloat32(n)
+		want = randFloat32(n)
+	)
+	for _, bounds := range [][2]float32{
+		{-math.MaxFloat32, math.MaxFloat32},
+		{0, 1},
+		{-1, 1},
+		{0, math.SmallestNonzeroFloat32},
+		// TODO: might be cute to test with the smallest non-subnormal
+		// float.
+	} {
+		simpleClip32(in, bounds[0], bounds[1], want)
+		for _, c := range clip32s[1:] {
+			t.Run(fmt.Sprintf("[%f-%f]/%s", bounds[0], bounds[1], c.name),
+				func(t *testing.T) {
+					// Fill the output with random numbers,
+					// because there's probably cases where
+					// the expected output is either exactly
+					// the same as the input, or all zeros
+					// etc.
+					got := randFloat32(n)
+					c.f(in, bounds[0], bounds[1], got)
+					for i := range in {
+						if got[i] != want[i] {
+							t.Fatalf("mismatch at %d: %f != %f", i, want[i], got[i])
+						}
+					}
+				})
+		}
+	}
+}
+
+func BenchmarkClipFloat32(b *testing.B) {
+	for _, size := range benchmarkSizes {
+		var (
+			in  = randFloat32(size)
+			out = make([]float32, size)
+		)
+		for _, c := range clip32s {
+			b.Run(fmt.Sprintf("%d/%s", size, c.name), func(b *testing.B) {
+				for b.Loop() {
+					c.f(in, -0.5, 0.5, out)
 				}
 			})
 		}
