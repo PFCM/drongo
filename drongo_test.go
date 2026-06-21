@@ -128,7 +128,7 @@ func TestAddFloat32(t *testing.T) {
 			if !reflect.DeepEqual(want, got) {
 				for i := range want {
 					if want[i] != got[i] {
-						t.Fatalf("mismatch, first:\n%f + %f = %f (want %f)", a[i], b[i], got[i], want[i])
+						t.Fatalf("mismatch, first at %d:\n%f + %f = %f (want %f)", i, a[i], b[i], got[i], want[i])
 					}
 				}
 			}
