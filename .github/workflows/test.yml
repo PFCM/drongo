@@ -9,7 +9,7 @@ jobs:
         os: [ubuntu-24.04, ubuntu-24.04-arm]
     runs-on: ${{ matrix.os }}
     env:
-	GOEXPERIMENT: simd
+      GOEXPERIMENT: simd
     steps:
       - name: checkout
         uses: actions/checkout@v6
