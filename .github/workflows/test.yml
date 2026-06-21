@@ -19,4 +19,6 @@ jobs:
           go-version-file: go.mod
       - name: go test
         run: go test ./...
+      - name: bench
+        run: go test -bench=. -run=xxx -benchtime=2s -benchmem ./...
         
