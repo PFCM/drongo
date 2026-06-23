@@ -11,4 +11,5 @@ var (
 	AddFloat32      = amd64.AddFloat32
 	AbsoluteFloat64 = all.AbsoluteFloat64
 	ClipFloat32     = all.ClipFloat32
+	FillFloat32     = all.FillFloat32
 )

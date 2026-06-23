@@ -34,3 +34,11 @@ func ClipFloat32(in []float32, lower, upper float32, out []float32) {
 	}
 	clipFloat32(in, lower, upper, out)
 }
+
+func fillFloat32(v float32, out []float32)
+
+var FillFloat32 = fillFloat32
+
+func fillFloat32STNP(v float32, out []float32)
+
+var FillFloat32STNP = fillFloat32STNP

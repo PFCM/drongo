@@ -360,3 +360,56 @@ func BenchmarkClipFloat32(b *testing.B) {
 		}
 	}
 }
+
+func simpleFillFloat32(v float32, out []float32) {
+	for i := range out {
+		out[i] = v
+	}
+}
+
+var fillers = []struct {
+	name string
+	f    func(float32, []float32)
+}{{
+	name: "simple",
+	f:    simpleFillFloat32,
+}, {
+	name: "fallback",
+	f:    all.FillFloat32,
+}, {
+	name: "arch-specific",
+	f:    FillFloat32,
+}}
+
+func TestFillFloat32(t *testing.T) {
+	for _, c := range fillers {
+		t.Run(c.name, func(t *testing.T) {
+			var (
+				v   float32 = 42.3
+				out         = make([]float32, 99)
+			)
+			c.f(v, out)
+			for i, got := range out {
+				if got != v {
+					t.Fatalf("mismatch at %d:\nwant: %f\n got: %f", i, v, out)
+				}
+			}
+		})
+	}
+}
+
+func BenchmarkFillFloat32(b *testing.B) {
+	for _, size := range benchmarkSizes {
+		var (
+			v   = float32(rand.ExpFloat64())
+			out = make([]float32, size)
+		)
+		for _, c := range fillers {
+			b.Run(fmt.Sprintf("%d/%s", size, c.name), func(b *testing.B) {
+				for b.Loop() {
+					c.f(v, out)
+				}
+			})
+		}
+	}
+}

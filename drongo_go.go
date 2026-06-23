@@ -6,8 +6,9 @@ import "github.com/pfcm/drongo/arch/all"
 
 // TODO: kind of ugly, but seems to big to get inlined and the extra function
 // call hurts a bit.
-var AddFloat32 = all.AddFloat32
-
-func AbsoluteFloat64(a, b []float64)
-
-func ClipFloat32(in []float32, l, w float32, out []float32)
+var (
+	AddFloat32      = all.AddFloat32
+	AbsoluteFloat64 = all.AbsoluteFloat64
+	ClipFloat32     = all.ClipFloat32
+	FillFloat32     = all.FillFloat32
+)

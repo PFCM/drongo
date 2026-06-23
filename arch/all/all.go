@@ -130,3 +130,59 @@ func ClipFloat32(in []float32, lower, upper float32, out []float32) {
 
 func ClipFloat64(in []float64, upper, lower float64, out []float64) {
 }
+
+func FillFloat32(v float32, out []float32) {
+	for len(out) >= 32 {
+		out[0] = v
+		out[1] = v
+		out[2] = v
+		out[3] = v
+		out[4] = v
+		out[5] = v
+		out[6] = v
+		out[7] = v
+		out[8] = v
+		out[9] = v
+		out[10] = v
+		out[11] = v
+		out[12] = v
+		out[13] = v
+		out[14] = v
+		out[15] = v
+		out[16] = v
+		out[17] = v
+		out[18] = v
+		out[19] = v
+		out[20] = v
+		out[21] = v
+		out[22] = v
+		out[23] = v
+		out[24] = v
+		out[25] = v
+		out[26] = v
+		out[27] = v
+		out[28] = v
+		out[29] = v
+		out[30] = v
+		out[31] = v
+
+		out = out[32:]
+	}
+
+	for len(out) >= 8 {
+		out[0] = v
+		out[1] = v
+		out[2] = v
+		out[3] = v
+		out[4] = v
+		out[5] = v
+		out[6] = v
+		out[7] = v
+
+		out = out[8:]
+	}
+
+	for i := range out {
+		out[i] = v
+	}
+}
